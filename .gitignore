@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Tauri / Rust target
+src-tauri/target/
+
+# Local databases & exports
+*.sqlite
+*.sqlite3
+exports/*
+!exports/.gitkeep
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/

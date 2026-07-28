@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Tax Invoice Template</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; color: #333; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>TAX INVOICE</h2>
+    <div>Invoice #: {{INVOICE_NUMBER}}</div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>HSN/SAC</th>
+        <th>Qty</th>
+        <th>Rate</th>
+        <th>GST %</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Items generated dynamically -->
+    </tbody>
+  </table>
+</body>
+</html>

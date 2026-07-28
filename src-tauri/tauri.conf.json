@@ -1,0 +1,47 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "AccountingApp",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "fs": {
+        "all": true,
+        "scope": ["$APPData/*", "$DOCUMENT/*", "$DOWNLOAD/*"]
+      },
+      "dialog": {
+        "all": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "category": "Business",
+      "identifier": "com.accounting.app",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ]
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "title": "Offline Accounting System",
+        "width": 1280,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  }
+}
