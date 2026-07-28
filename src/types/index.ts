@@ -13,6 +13,7 @@ export type VoucherType =
   | 'PurchaseOrder';
 
 export type VoucherStatus = 'Draft' | 'Confirmed' | 'Cancelled';
+export type AllocationType = 'AgainstRef' | 'OnAccount' | 'AdvanceRef';
 
 export interface AccountGroup {
   group_id: number;
@@ -110,4 +111,23 @@ export interface VoucherAuditLog {
   old_snapshot?: string | null;
   new_snapshot?: string | null;
   action: 'ALTER' | 'CANCEL';
+}
+
+export interface Bill {
+  bill_id: number;
+  voucher_id: number;
+  bill_reference: string;
+  party_ledger_id: number;
+  bill_amount: number;
+  bill_date: string;
+  due_date?: string | null;
+  is_settled: boolean;
+}
+
+export interface BillAllocation {
+  allocation_id: number;
+  voucher_id: number;
+  bill_id?: number | null;
+  allocation_type: AllocationType;
+  amount: number;
 }

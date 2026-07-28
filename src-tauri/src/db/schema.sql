@@ -121,7 +121,32 @@ CREATE TABLE IF NOT EXISTS VoucherAuditLog (
 );
 
 -- ============================================================================
--- 3. REPORTING SNAPSHOT TABLES (OPTIONAL CACHE)
+-- 3. BILL TRACKING & ALLOCATION TABLES (TALLY NEW REF / AGAINST REF)
+-- ============================================================================
+
+-- 3.1 Bills
+CREATE TABLE IF NOT EXISTS Bills (
+    bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    voucher_id INTEGER NOT NULL REFERENCES Vouchers(voucher_id) ON DELETE CASCADE,
+    bill_reference TEXT NOT NULL,
+    party_ledger_id INTEGER NOT NULL REFERENCES Ledgers(ledger_id),
+    bill_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    bill_date DATE NOT NULL,
+    due_date DATE,
+    is_settled BOOLEAN NOT NULL DEFAULT 0
+);
+
+-- 3.2 BillAllocations
+CREATE TABLE IF NOT EXISTS BillAllocations (
+    allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    voucher_id INTEGER NOT NULL REFERENCES Vouchers(voucher_id) ON DELETE CASCADE,
+    bill_id INTEGER REFERENCES Bills(bill_id) ON DELETE SET NULL,
+    allocation_type TEXT NOT NULL CHECK (allocation_type IN ('AgainstRef', 'OnAccount', 'AdvanceRef')),
+    amount DECIMAL(15,2) NOT NULL DEFAULT 0.00
+);
+
+-- ============================================================================
+-- 4. REPORTING SNAPSHOT TABLES (OPTIONAL CACHE)
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS TrialBalanceSnapshot (
@@ -142,7 +167,7 @@ CREATE TABLE IF NOT EXISTS BalanceSheetSnapshot (
 );
 
 -- ============================================================================
--- 4. INDEXES
+-- 5. INDEXES
 -- ============================================================================
 
 CREATE INDEX IF NOT EXISTS idx_vouchers_date ON Vouchers(voucher_date);
@@ -155,8 +180,13 @@ CREATE INDEX IF NOT EXISTS idx_journal_entries_date ON JournalEntries(entry_date
 
 CREATE INDEX IF NOT EXISTS idx_line_items_voucher ON VoucherLineItems(voucher_id);
 
+CREATE INDEX IF NOT EXISTS idx_bills_party ON Bills(party_ledger_id);
+CREATE INDEX IF NOT EXISTS idx_bills_voucher ON Bills(voucher_id);
+CREATE INDEX IF NOT EXISTS idx_allocations_bill ON BillAllocations(bill_id);
+CREATE INDEX IF NOT EXISTS idx_allocations_voucher ON BillAllocations(voucher_id);
+
 -- ============================================================================
--- 5. SEED DATA (DEFAULT SYSTEM GROUPS & LEDGERS)
+-- 6. SEED DATA (DEFAULT SYSTEM GROUPS & LEDGERS)
 -- ============================================================================
 
 -- Primary Groups

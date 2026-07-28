@@ -5,3 +5,5 @@ pub mod journal_entry;
 pub mod inventory_item;
 pub mod financial_year;
 pub mod audit_log;
+pub mod bill;
+pub mod bill_allocation;

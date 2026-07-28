@@ -136,7 +136,36 @@ Tracks every alteration or cancellation for audit-trail integrity.
 
 ---
 
-## 3. Indexes & Performance Optimizations
+## 3. Bill Tracking & Allocation Tables (Tally "New Ref" / "Against Ref")
+
+### 3.1 `Bills`
+Represents each individual outstanding invoice (created automatically the moment a Sales/Purchase voucher is confirmed — Tally's "New Ref").
+
+| Column | Type | Notes |
+|---|---|---|
+| bill_id | INTEGER, PK | |
+| voucher_id | INTEGER, FK → Vouchers.voucher_id | Sales/Purchase invoice this bill represents |
+| bill_reference | TEXT | usually voucher_number, but editable |
+| party_ledger_id | INTEGER, FK → Ledgers.ledger_id | debtor/creditor ledger |
+| bill_amount | DECIMAL | original invoice total |
+| bill_date | DATE | date of invoice |
+| due_date | DATE | nullable, for ageing/reminders |
+| is_settled | BOOLEAN | true once fully allocated |
+
+### 3.2 `BillAllocations`
+Represents each payment/receipt/CN/DN matched against a specific bill (Tally's "Against Ref" / "On Account").
+
+| Column | Type | Notes |
+|---|---|---|
+| allocation_id | INTEGER, PK | |
+| voucher_id | INTEGER, FK → Vouchers.voucher_id | Payment/Receipt/CreditNote/DebitNote settling the bill |
+| bill_id | INTEGER, FK → Bills.bill_id | nullable — null means "On Account" (unallocated advance) |
+| allocation_type | ENUM(AgainstRef, OnAccount, AdvanceRef) | |
+| amount | DECIMAL | allocated settlement amount |
+
+---
+
+## 4. Indexes & Performance Optimizations
 
 - `Vouchers(voucher_date)`
 - `Vouchers(voucher_type)`
@@ -144,4 +173,8 @@ Tracks every alteration or cancellation for audit-trail integrity.
 - `JournalEntries(ledger_id)`
 - `JournalEntries(entry_date)`
 - `VoucherLineItems(voucher_id)`
+- `Bills(party_ledger_id)`
+- `Bills(voucher_id)`
+- `BillAllocations(bill_id)`
+- `BillAllocations(voucher_id)`
 - Composite index on `Vouchers(voucher_type, fy_id)`
