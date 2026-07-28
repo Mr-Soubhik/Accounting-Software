@@ -4,20 +4,24 @@ export const InvoicingPage: React.FC = () => {
   const [selectedSubTab, setSelectedSubTab] = useState<'bills' | 'ageing' | 'settlement'>('bills');
 
   const bills = [
-    { billId: 101, ref: 'INV-2025-001', party: 'Acme Traders Pvt Ltd', date: '2026-03-10', dueDate: '2026-04-10', amount: 118000, allocated: 50000, outstanding: 68000, status: 'Partially Settled', daysOverdue: 5 },
-    { billId: 102, ref: 'INV-2025-004', party: 'Acme Traders Pvt Ltd', date: '2026-04-12', dueDate: '2026-05-12', amount: 150000, allocated: 0, outstanding: 150000, status: 'Unsettled', daysOverdue: 0 },
-    { billId: 103, ref: 'PUR-2025-001', party: 'Vortex Raw Materials', date: '2026-02-15', dueDate: '2026-03-15', amount: 85400, allocated: 0, outstanding: 85400, status: 'Overdue', daysOverdue: 30 },
+    { billId: 101, ref: 'INV-2025-001', party: 'Acme Traders Pvt Ltd', date: '10-Mar-2026', dueDate: '10-Apr-2026', amount: 118000, allocated: 50000, outstanding: 68000, status: 'Partially Settled', daysOverdue: 5 },
+    { billId: 102, ref: 'INV-2025-004', party: 'Acme Traders Pvt Ltd', date: '12-Apr-2026', dueDate: '12-May-2026', amount: 150000, allocated: 0, outstanding: 150000, status: 'Unsettled', daysOverdue: 0 },
+    { billId: 103, ref: 'PUR-2025-001', party: 'Vortex Raw Materials', date: '15-Feb-2026', dueDate: '15-Mar-2026', amount: 85400, allocated: 0, outstanding: 85400, status: 'Overdue', daysOverdue: 30 },
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '1.4rem', color: '#f8fafc' }}>Bill-Wise Tracking & Ageing Analysis</h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
-            Tally-style New Ref, Against Ref, On Account bill allocations & debtor/creditor ageing
-          </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Header Bar */}
+      <div style={{
+        backgroundColor: 'var(--tally-teal-header)',
+        border: '1px solid var(--tally-border-highlight)',
+        padding: '0.4rem 0.85rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ color: 'var(--tally-yellow)', fontWeight: 700, fontSize: '0.95rem' }}>
+          Bill-Wise Outstanding & Ageing Analysis (New Ref / Against Ref)
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -26,13 +30,12 @@ export const InvoicingPage: React.FC = () => {
               key={tab}
               onClick={() => setSelectedSubTab(tab)}
               style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                backgroundColor: selectedSubTab === tab ? '#6366f1' : '#151c2c',
-                color: '#fff',
-                fontWeight: selectedSubTab === tab ? 600 : 400,
-                fontSize: '0.85rem',
-                border: '1px solid #26334d'
+                padding: '0.2rem 0.6rem',
+                fontSize: '0.75rem',
+                backgroundColor: selectedSubTab === tab ? 'var(--tally-yellow)' : '#00252b',
+                color: selectedSubTab === tab ? '#002229' : '#fff',
+                fontWeight: selectedSubTab === tab ? 700 : 400,
+                border: '1px solid var(--tally-border-highlight)'
               }}
             >
               {tab === 'bills' ? 'Outstanding Bills' : tab === 'ageing' ? 'Debtor Ageing Report' : 'Against Ref Settlement'}
@@ -42,45 +45,41 @@ export const InvoicingPage: React.FC = () => {
       </div>
 
       {/* Ageing Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem' }}>
-        <div className="card" style={{ borderLeft: '4px solid #10b981' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>0 - 30 Days (Current)</span>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#f8fafc', marginTop: '0.3rem' }}>₹ 1,50,000.00</div>
-          <span style={{ fontSize: '0.75rem', color: '#10b981' }}>1 Bill Pending</span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+        <div style={{ backgroundColor: 'var(--tally-card-bg)', border: '1px solid var(--tally-border)', borderLeft: '4px solid var(--tally-green)', padding: '0.75rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-muted)' }}>0 - 30 Days (Current)</span>
+          <div className="tally-mono" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--tally-yellow)', marginTop: '0.2rem' }}>₹ 1,50,000.00</div>
+          <span style={{ fontSize: '0.7rem', color: 'var(--tally-green)' }}>1 Bill Pending</span>
         </div>
-        <div className="card" style={{ borderLeft: '4px solid #f59e0b' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>31 - 60 Days</span>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#f8fafc', marginTop: '0.3rem' }}>₹ 68,000.00</div>
-          <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>1 Bill Overdue</span>
+        <div style={{ backgroundColor: 'var(--tally-card-bg)', border: '1px solid var(--tally-border)', borderLeft: '4px solid var(--tally-yellow)', padding: '0.75rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-muted)' }}>31 - 60 Days</span>
+          <div className="tally-mono" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--tally-yellow)', marginTop: '0.2rem' }}>₹ 68,000.00</div>
+          <span style={{ fontSize: '0.7rem', color: 'var(--tally-yellow)' }}>1 Bill Overdue</span>
         </div>
-        <div className="card" style={{ borderLeft: '4px solid #f43f5e' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>61 - 90 Days</span>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#f8fafc', marginTop: '0.3rem' }}>₹ 85,400.00</div>
-          <span style={{ fontSize: '0.75rem', color: '#f43f5e' }}>1 Bill Action Required</span>
+        <div style={{ backgroundColor: 'var(--tally-card-bg)', border: '1px solid var(--tally-border)', borderLeft: '4px solid var(--tally-red)', padding: '0.75rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-muted)' }}>61 - 90 Days</span>
+          <div className="tally-mono" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--tally-red)', marginTop: '0.2rem' }}>₹ 85,400.00</div>
+          <span style={{ fontSize: '0.7rem', color: 'var(--tally-red)' }}>1 Bill Action Required</span>
         </div>
-        <div className="card" style={{ borderLeft: '4px solid #64748b' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>90+ Days</span>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#f8fafc', marginTop: '0.3rem' }}>₹ 0.00</div>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>0 Critical Bills</span>
+        <div style={{ backgroundColor: 'var(--tally-card-bg)', border: '1px solid var(--tally-border)', borderLeft: '4px solid var(--tally-text-dim)', padding: '0.75rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-muted)' }}>90+ Days</span>
+          <div className="tally-mono" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--tally-text)', marginTop: '0.2rem' }}>₹ 0.00</div>
+          <span style={{ fontSize: '0.7rem', color: 'var(--tally-text-dim)' }}>0 Critical Bills</span>
         </div>
       </div>
 
       {/* Outstanding Bills Table */}
-      <div className="card">
-        <h3 style={{ fontSize: '1.05rem', color: '#f8fafc', marginBottom: '0.75rem' }}>
-          Outstanding Invoices & Bills (New Ref)
-        </h3>
-
-        <table className="custom-table">
+      <div style={{ backgroundColor: 'var(--tally-card-bg)', border: '1px solid var(--tally-border)' }}>
+        <table className="tally-table">
           <thead>
             <tr>
               <th>Bill Ref</th>
               <th>Party Ledger</th>
               <th>Invoice Date</th>
               <th>Due Date</th>
-              <th>Bill Amount</th>
-              <th>Allocated</th>
-              <th>Outstanding</th>
+              <th style={{ textAlign: 'right' }}>Bill Amount</th>
+              <th style={{ textAlign: 'right' }}>Allocated</th>
+              <th style={{ textAlign: 'right' }}>Outstanding</th>
               <th>Status</th>
               <th style={{ textAlign: 'center' }}>Action</th>
             </tr>
@@ -88,20 +87,20 @@ export const InvoicingPage: React.FC = () => {
           <tbody>
             {bills.map(b => (
               <tr key={b.billId}>
-                <td style={{ fontWeight: 600, color: '#6366f1' }}>{b.ref}</td>
-                <td>{b.party}</td>
-                <td style={{ color: '#94a3b8' }}>{b.date}</td>
-                <td style={{ color: b.daysOverdue > 0 ? '#f43f5e' : '#94a3b8' }}>{b.dueDate}</td>
-                <td style={{ fontWeight: 600 }}>₹ {b.amount.toLocaleString('en-IN')}</td>
-                <td style={{ color: '#10b981' }}>₹ {b.allocated.toLocaleString('en-IN')}</td>
-                <td style={{ fontWeight: 700, color: '#f8fafc' }}>₹ {b.outstanding.toLocaleString('en-IN')}</td>
+                <td className="tally-mono" style={{ fontWeight: 600, color: 'var(--tally-yellow)' }}>{b.ref}</td>
+                <td style={{ fontWeight: 600 }}>{b.party}</td>
+                <td style={{ color: 'var(--tally-text-muted)' }}>{b.date}</td>
+                <td style={{ color: b.daysOverdue > 0 ? 'var(--tally-red)' : 'var(--tally-text-muted)' }}>{b.dueDate}</td>
+                <td className="tally-mono" style={{ textAlign: 'right', fontWeight: 600 }}>₹ {b.amount.toLocaleString('en-IN')}</td>
+                <td className="tally-mono" style={{ textAlign: 'right', color: 'var(--tally-green)' }}>₹ {b.allocated.toLocaleString('en-IN')}</td>
+                <td className="tally-mono" style={{ textAlign: 'right', fontWeight: 700, color: 'var(--tally-text)' }}>₹ {b.outstanding.toLocaleString('en-IN')}</td>
                 <td>
-                  <span className={`badge ${b.status === 'Partially Settled' ? 'badge-confirmed' : 'badge-cr'}`}>
+                  <span className="badge badge-dr" style={{ fontSize: '0.7rem' }}>
                     {b.status}
                   </span>
                 </td>
                 <td style={{ textAlign: 'center' }}>
-                  <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
+                  <button className="tally-btn" style={{ fontSize: '0.7rem' }}>
                     Settle Against Ref
                   </button>
                 </td>
