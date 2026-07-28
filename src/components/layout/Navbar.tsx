@@ -19,22 +19,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentFy, onFyChange }) => {
       top: 0,
       zIndex: 100
     }}>
-      {/* Left: Tally Prime Brand & Universal Go To */}
+      {/* Left: Tally Prime MOD APK by Soubhik Brand & Universal Go To */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <span style={{
             backgroundColor: 'var(--tally-yellow)',
             color: '#002229',
             fontWeight: 900,
-            fontSize: '0.9rem',
-            padding: '0.1rem 0.4rem',
+            fontSize: '0.85rem',
+            padding: '0.15rem 0.5rem',
             borderRadius: '2px',
             letterSpacing: '0.05em'
           }}>
-            TALLY
+            TALLY PRIME MOD APK
           </span>
           <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem' }}>
-            PRIME <span style={{ fontSize: '0.7rem', color: 'var(--tally-yellow)' }}>v4.0 (Offline)</span>
+            by Soubhik <span style={{ fontSize: '0.7rem', color: 'var(--tally-yellow)' }}>v4.0 (Offline Desktop Edition)</span>
           </span>
         </div>
 
@@ -70,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentFy, onFyChange }) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.85rem' }}>
         <div>
           <span style={{ color: 'var(--tally-text-muted)' }}>Company: </span>
-          <span style={{ color: 'var(--tally-yellow)', fontWeight: 700 }}>Acme Global Accounting Pvt Ltd</span>
+          <span style={{ color: 'var(--tally-yellow)', fontWeight: 700 }}>Soubhik Global Enterprise Pvt Ltd</span>
         </div>
 
         <div>

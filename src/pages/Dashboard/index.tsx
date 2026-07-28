@@ -9,7 +9,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1fr 380px',
+      gridTemplateColumns: '1fr 400px',
       gap: '2rem',
       alignItems: 'start',
       padding: '1.5rem 0'
@@ -27,14 +27,14 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
         }}>
           <div>
             <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-muted)', display: 'block' }}>Current Company</span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--tally-yellow)' }}>Acme Global Accounting Pvt Ltd</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--tally-yellow)' }}>Soubhik Global Enterprise Pvt Ltd</span>
             <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-dim)', display: 'block', marginTop: '0.25rem' }}>GSTIN: 07AAAAA0000A1Z5 (Delhi)</span>
           </div>
 
           <div>
             <span style={{ fontSize: '0.75rem', color: 'var(--tally-text-muted)', display: 'block' }}>Date of Last Entry</span>
             <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>15-Apr-2026</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--tally-green)', display: 'block', marginTop: '0.25rem' }}>✓ System Balanced (Dr = Cr)</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--tally-green)', display: 'block', marginTop: '0.25rem' }}>✓ Tally Engine Balanced (Dr = Cr)</span>
           </div>
         </div>
 
@@ -105,10 +105,11 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Right: Authentic "Gateway of Tally" Menu Box */}
+      {/* Right: Gateway of Tally Prime MOD APK by Soubhik Menu Box */}
       <div className="gateway-box" style={{ justifySelf: 'center' }}>
-        <div className="gateway-header">
-          GATEWAY OF TALLY
+        <div className="gateway-header" style={{ fontSize: '0.85rem', lineHeight: '1.3' }}>
+          GATEWAY OF TALLY<br/>
+          <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 400 }}>MOD APK BY SOUBHIK</span>
         </div>
 
         {/* MASTERS */}
