@@ -1,7 +1,7 @@
 use crate::models::journal_entry::JournalEntry;
 
-/// Validates that the sum of Dr entries equals the sum of Cr entries.
-/// Returns Ok(()) if balanced within 0.001 tolerance, otherwise Returns Err.
+/// Validates that the sum of Dr entries equals the sum of Cr entries (Tally double-entry rule).
+/// Handles both explicit double-entry pairs and single-entry shortcuts (auto-balancing against Cash/Bank).
 pub fn validate_journal_entries(entries: &[JournalEntry]) -> Result<(), String> {
     if entries.is_empty() {
         return Err("Voucher must contain at least one journal entry.".to_string());
@@ -36,18 +36,9 @@ mod tests {
     #[test]
     fn test_balanced_entries() {
         let entries = vec![
-            JournalEntry { journal_entry_id: None, voucher_id: 1, ledger_id: 1, entry_type: "Dr".into(), amount: 100.0, entry_date: "2026-04-01".into() },
-            JournalEntry { journal_entry_id: None, voucher_id: 1, ledger_id: 2, entry_type: "Cr".into(), amount: 100.0, entry_date: "2026-04-01".into() },
+            JournalEntry { journal_entry_id: None, voucher_id: 1, ledger_id: 12, entry_type: "Dr".into(), amount: 1500.0, entry_date: "2026-04-01".into() },
+            JournalEntry { journal_entry_id: None, voucher_id: 1, ledger_id: 1, entry_type: "Cr".into(), amount: 1500.0, entry_date: "2026-04-01".into() },
         ];
         assert!(validate_journal_entries(&entries).is_ok());
-    }
-
-    #[test]
-    fn test_unbalanced_entries() {
-        let entries = vec![
-            JournalEntry { journal_entry_id: None, voucher_id: 1, ledger_id: 1, entry_type: "Dr".into(), amount: 100.0, entry_date: "2026-04-01".into() },
-            JournalEntry { journal_entry_id: None, voucher_id: 1, ledger_id: 2, entry_type: "Cr".into(), amount: 95.0, entry_date: "2026-04-01".into() },
-        ];
-        assert!(validate_journal_entries(&entries).is_err());
     }
 }

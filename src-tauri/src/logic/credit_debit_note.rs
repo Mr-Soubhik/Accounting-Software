@@ -1,79 +1,104 @@
-use rusqlite::{Transaction, Result, params};
 use crate::models::journal_entry::JournalEntry;
+use crate::models::voucher_line_item::VoucherLineItem;
+use crate::logic::tax_calculation::{calculate_line_tax, calculate_invoice_summary};
 
-/// Structure representing tax reversal entries generated for a Credit/Debit Note.
-pub struct TaxReversalResult {
-    pub reversing_entries: Vec<JournalEntry>,
-}
-
-/// Generates proportional tax reversal journal entries when a Credit or Debit Note is linked to an original voucher.
-pub fn generate_tax_reversals(
-    tx: &Transaction,
-    credit_debit_voucher_id: i64,
-    original_voucher_id: i64,
-    note_total_amount: f64,
+/// Generates journal entries for an independent Credit/Debit Note based on its own line items (Tally rule).
+/// Links to original_voucher_id purely for reference/audit trail.
+pub fn generate_credit_debit_note_entries(
+    voucher_id: i64,
+    voucher_type: &str, // "CreditNote" or "DebitNote"
+    party_ledger_id: i64,
+    cgst_ledger_id: i64,
+    sgst_ledger_id: i64,
+    igst_ledger_id: i64,
+    round_off_ledger_id: i64,
+    line_items: &[VoucherLineItem],
+    place_of_supply: &str,
+    company_state_code: &str,
     entry_date: &str,
 ) -> Result<Vec<JournalEntry>, String> {
-    // 1. Fetch original voucher total amount
-    let orig_total: f64 = tx
-        .query_row(
-            "SELECT total_amount FROM Vouchers WHERE voucher_id = ?",
-            params![original_voucher_id],
-            |row| row.get(0),
-        )
-        .map_err(|e| format!("Failed to find original voucher {}: {}", original_voucher_id, e))?;
+    let mut line_breakdowns = Vec::new();
 
-    if orig_total <= 0.0 {
-        return Err(format!("Original voucher {} total amount must be > 0", original_voucher_id));
+    for item in line_items {
+        let breakdown = calculate_line_tax(
+            item.quantity,
+            item.rate,
+            item.gst_rate,
+            item.cess_rate,
+            place_of_supply,
+            company_state_code,
+        );
+        line_breakdowns.push(breakdown);
     }
 
-    let ratio = (note_total_amount / orig_total).min(1.0);
+    let summary = calculate_invoice_summary(&line_breakdowns);
+    let mut journal_entries = Vec::new();
 
-    // 2. Fetch tax journal entries associated with the original voucher.
-    // Tax ledgers belong to group 'Duties & Taxes' (group_id = 14) or system tax ledgers (CGST/SGST/IGST/Cess)
-    let mut stmt = tx
-        .prepare(
-            "SELECT j.ledger_id, j.entry_type, j.amount
-             FROM JournalEntries j
-             JOIN Ledgers l ON j.ledger_id = l.ledger_id
-             WHERE j.voucher_id = ? AND (l.group_id = 14 OR l.ledger_name LIKE '%GST%' OR l.ledger_name LIKE '%Cess%')",
-        )
-        .map_err(|e| e.to_string())?;
+    // Determine Dr vs Cr orientation based on voucher_type
+    // CreditNote: Credits Party, Debits Sales/Tax Returns
+    // DebitNote: Debits Party, Credits Purchase/Tax Returns
+    let (party_type, tax_type) = match voucher_type {
+        "CreditNote" => ("Cr", "Dr"),
+        "DebitNote" => ("Dr", "Cr"),
+        other => return Err(format!("Unsupported voucher_type '{}' for Credit/Debit Note engine", other)),
+    };
 
-    let rows = stmt
-        .query_map(params![original_voucher_id], |row| {
-            Ok((
-                row.get::<_, i64>(0)?,
-                row.get::<_, String>(1)?,
-                row.get::<_, f64>(2)?,
-            ))
-        })
-        .map_err(|e| e.to_string())?;
+    // 1. Party ledger entry for grand total
+    journal_entries.push(JournalEntry {
+        journal_entry_id: None,
+        voucher_id,
+        ledger_id: party_ledger_id,
+        entry_type: party_type.to_string(),
+        amount: summary.rounded_grand_total,
+        entry_date: entry_date.to_string(),
+    });
 
-    let mut reversing_entries = Vec::new();
-
-    for row in rows {
-        let (ledger_id, orig_entry_type, orig_amount) = row.map_err(|e| e.to_string())?;
-        let reversed_amount = (orig_amount * ratio * 100.0).round() / 100.0;
-
-        if reversed_amount > 0.0 {
-            // Reverse Dr to Cr and Cr to Dr
-            let reversed_type = match orig_entry_type.as_str() {
-                "Dr" => "Cr",
-                "Cr" => "Dr",
-                _ => "Cr",
-            };
-
-            reversing_entries.push(JournalEntry {
-                journal_entry_id: None,
-                voucher_id: credit_debit_voucher_id,
-                ledger_id,
-                entry_type: reversed_type.to_string(),
-                amount: reversed_amount,
-                entry_date: entry_date.to_string(),
-            });
-        }
+    // 2. Tax entries (CGST / SGST / IGST)
+    if summary.total_cgst > 0.0 {
+        journal_entries.push(JournalEntry {
+            journal_entry_id: None,
+            voucher_id,
+            ledger_id: cgst_ledger_id,
+            entry_type: tax_type.to_string(),
+            amount: summary.total_cgst,
+            entry_date: entry_date.to_string(),
+        });
     }
 
-    Ok(reversing_entries)
+    if summary.total_sgst > 0.0 {
+        journal_entries.push(JournalEntry {
+            journal_entry_id: None,
+            voucher_id,
+            ledger_id: sgst_ledger_id,
+            entry_type: tax_type.to_string(),
+            amount: summary.total_sgst,
+            entry_date: entry_date.to_string(),
+        });
+    }
+
+    if summary.total_igst > 0.0 {
+        journal_entries.push(JournalEntry {
+            journal_entry_id: None,
+            voucher_id,
+            ledger_id: igst_ledger_id,
+            entry_type: tax_type.to_string(),
+            amount: summary.total_igst,
+            entry_date: entry_date.to_string(),
+        });
+    }
+
+    // 3. Round off entry if needed
+    if summary.round_off_adjustment.abs() > 0.001 {
+        let round_type = if summary.round_off_adjustment > 0.0 { tax_type } else { party_type };
+        journal_entries.push(JournalEntry {
+            journal_entry_id: None,
+            voucher_id,
+            ledger_id: round_off_ledger_id,
+            entry_type: round_type.to_string(),
+            amount: summary.round_off_adjustment.abs(),
+            entry_date: entry_date.to_string(),
+        });
+    }
+
+    Ok(journal_entries)
 }

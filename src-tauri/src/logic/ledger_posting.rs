@@ -1,6 +1,8 @@
 use rusqlite::{Transaction, Result, params};
 
-/// Recalculates and updates the LedgerRunningBalance for a given ledger_id within an active transaction.
+/// Recalculates and updates LedgerRunningBalance for a given ledger_id using Tally's exact formula:
+/// signed_balance = opening_signed + total_Dr - total_Cr.
+/// Displays as Dr if signed_balance >= 0, or Cr if signed_balance < 0.
 pub fn sync_ledger_running_balance(tx: &Transaction, ledger_id: i64) -> Result<()> {
     // 1. Fetch opening balance details from Ledgers
     let (opening_bal, opening_type): (f64, String) = tx.query_row(
@@ -8,6 +10,12 @@ pub fn sync_ledger_running_balance(tx: &Transaction, ledger_id: i64) -> Result<(
         params![ledger_id],
         |row| Ok((row.get(0)?, row.get(1)?)),
     )?;
+
+    let opening_signed = match opening_type.as_str() {
+        "Dr" => opening_bal,
+        "Cr" => -opening_bal,
+        _ => opening_bal,
+    };
 
     // 2. Sum total Dr and Cr from JournalEntries for this ledger
     let sum_dr: f64 = tx.query_row(
@@ -22,21 +30,13 @@ pub fn sync_ledger_running_balance(tx: &Transaction, ledger_id: i64) -> Result<(
         |row| row.get(0),
     )?;
 
-    // 3. Compute net balance relative to opening balance type
-    let net = match opening_type.as_str() {
-        "Dr" => opening_bal + sum_dr - sum_cr,
-        "Cr" => opening_bal + sum_cr - sum_dr,
-        _ => opening_bal + sum_dr - sum_cr,
-    };
+    // 3. Tally running balance formula: total Dr - total Cr
+    let net = opening_signed + sum_dr - sum_cr;
 
     let (final_balance, final_type) = if net >= 0.0 {
-        (net, opening_type)
+        (net, "Dr".to_string())
     } else {
-        let opp_type = match opening_type.as_str() {
-            "Dr" => "Cr",
-            _ => "Dr",
-        };
-        (-net, opp_type.to_string())
+        (-net, "Cr".to_string())
     };
 
     // 4. Update LedgerRunningBalance table atomically

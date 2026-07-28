@@ -21,7 +21,8 @@ fn main() {
             commands::financial_years::get_financial_years,
             commands::audit_log::get_audit_logs,
             commands::reports_export::export_report_pdf,
-            commands::analysis::calculate_financial_ratios
+            commands::analysis::calculate_financial_ratios,
+            commands::bill_tracking::get_ageing_report
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
