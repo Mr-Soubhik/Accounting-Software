@@ -1,5 +1,6 @@
 import React from 'react';
 import { VoucherType } from '../../types';
+import { ActiveModalType } from '../modals/TallyModals';
 
 export type NavTab = 
   | 'dashboard'
@@ -14,13 +15,14 @@ interface SidebarProps {
   activeTab: NavTab;
   activeVoucherType?: VoucherType;
   onTabChange: (tab: NavTab, voucherType?: VoucherType) => void;
+  onOpenModal: (modal: ActiveModalType) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, onTabChange }) => {
-  const fKeys: { key: string; label: string; tab: NavTab; voucherType?: VoucherType }[] = [
-    { key: 'F2', label: 'Date', tab: 'dashboard' },
-    { key: 'F3', label: 'Company', tab: 'settings' },
-    { key: 'F4', label: 'Contra', tab: 'vouchers', voucherType: 'Contra' },
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, onTabChange, onOpenModal }) => {
+  const fKeys: { key: string; label: string; tab?: NavTab; voucherType?: VoucherType; modalType?: ActiveModalType }[] = [
+    { key: 'F2', label: 'Date', modalType: 'F2_Date' },
+    { key: 'F3', label: 'Company', modalType: 'F3_Company' },
+    { key: 'F4', label: 'Contra (Cash/Bank)', tab: 'vouchers', voucherType: 'Contra' },
     { key: 'F5', label: 'Payment', tab: 'vouchers', voucherType: 'Payment' },
     { key: 'F6', label: 'Receipt', tab: 'vouchers', voucherType: 'Receipt' },
     { key: 'F7', label: 'Journal', tab: 'vouchers', voucherType: 'Journal' },
@@ -29,8 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, 
     { key: 'Alt+F6', label: 'Credit Note', tab: 'vouchers', voucherType: 'CreditNote' },
     { key: 'Alt+F9', label: 'Debit Note', tab: 'vouchers', voucherType: 'DebitNote' },
     { key: 'F10', label: 'Other Vouchers', tab: 'vouchers', voucherType: 'Sales' },
-    { key: 'F11', label: 'Features', tab: 'settings' },
-    { key: 'F12', label: 'Configure', tab: 'settings' },
+    { key: 'F11', label: 'Features', modalType: 'F11_Features' },
+    { key: 'F12', label: 'Configure', modalType: 'F12_Configure' },
   ];
 
   return (
@@ -63,14 +65,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, 
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.2rem' }}>
         {fKeys.map((item, idx) => {
-          const isTabActive = activeTab === item.tab;
+          const isTabActive = item.tab ? activeTab === item.tab : false;
           const isVoucherMatch = item.voucherType ? activeVoucherType === item.voucherType : true;
           const isActive = isTabActive && isVoucherMatch;
           
           return (
             <button
               key={idx}
-              onClick={() => onTabChange(item.tab, item.voucherType)}
+              onClick={() => {
+                if (item.modalType) {
+                  onOpenModal(item.modalType);
+                } else if (item.tab) {
+                  onTabChange(item.tab, item.voucherType);
+                }
+              }}
               style={{
                 width: '100%',
                 padding: '0.4rem 0.5rem',
@@ -80,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                fontSize: '0.75rem',
+                fontSize: '0.73rem',
                 textAlign: 'left',
                 cursor: 'pointer'
               }}
@@ -94,4 +102,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, 
     </aside>
   );
 };
+
 

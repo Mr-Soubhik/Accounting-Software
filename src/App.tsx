@@ -7,11 +7,15 @@ import { LedgersPage } from './pages/Ledgers';
 import { InvoicingPage } from './pages/Invoicing';
 import { ReportsPage } from './pages/Reports';
 import { VoucherType } from './types';
+import { TallyModals, ActiveModalType } from './components/modals/TallyModals';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [voucherType, setVoucherType] = useState<VoucherType>('Sales');
   const [currentFy, setCurrentFy] = useState('FY2025-26');
+  const [currentDate, setCurrentDate] = useState('15-Apr-2026');
+  const [currentCompany, setCurrentCompany] = useState('Soubhik Global Enterprise Pvt Ltd');
+  const [activeModal, setActiveModal] = useState<ActiveModalType>('none');
 
   const handleTabChange = (tab: NavTab, vType?: VoucherType) => {
     setActiveTab(tab);
@@ -49,9 +53,25 @@ export default function App() {
         </main>
 
         {/* Tally Right Function Key Sidebar */}
-        <Sidebar activeTab={activeTab} activeVoucherType={voucherType} onTabChange={handleTabChange} />
+        <Sidebar
+          activeTab={activeTab}
+          activeVoucherType={voucherType}
+          onTabChange={handleTabChange}
+          onOpenModal={setActiveModal}
+        />
       </div>
+
+      {/* Interactive Tally Modals (F2 Date, F3 Company, F11 Features, F12 Configure) */}
+      <TallyModals
+        activeModal={activeModal}
+        onClose={() => setActiveModal('none')}
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+        currentCompany={currentCompany}
+        onCompanyChange={setCurrentCompany}
+      />
     </div>
   );
 }
+
 

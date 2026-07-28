@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { VoucherType } from '../../types';
 
+interface SavedVoucher {
+  id: string;
+  number: string;
+  type: VoucherType;
+  date: string;
+  party: string;
+  amount: number;
+  narration: string;
+}
+
 interface TransactionEntryPageProps {
   initialVoucherType?: VoucherType;
   onVoucherTypeChange?: (type: VoucherType) => void;
@@ -11,6 +21,24 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
   onVoucherTypeChange
 }) => {
   const [voucherType, setVoucherType] = useState<VoucherType>(initialVoucherType);
+  const [showSavedVouchers, setShowSavedVouchers] = useState(false);
+
+  // Load / Store Saved Vouchers
+  const [savedVouchers, setSavedVouchers] = useState<SavedVoucher[]>(() => {
+    const local = localStorage.getItem('tally_saved_vouchers');
+    if (local) {
+      try { return JSON.parse(local); } catch (e) {}
+    }
+    return [
+      { id: '1', number: 'INV-2025-005', type: 'Sales', date: '15-Apr-2026', party: 'Acme Traders Pvt Ltd', amount: 118000, narration: 'Sales against PO #99812' },
+      { id: '2', number: 'PUR-2025-001', type: 'Purchase', date: '10-Apr-2026', party: 'Vortex Raw Materials', amount: 85400, narration: 'Raw materials purchase' },
+      { id: '3', number: 'REC-2025-002', type: 'Receipt', date: '12-Apr-2026', party: 'Acme Traders Pvt Ltd', amount: 50000, narration: 'Payment received via HDFC' },
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tally_saved_vouchers', JSON.stringify(savedVouchers));
+  }, [savedVouchers]);
 
   // Sync internal state with prop changes
   useEffect(() => {
@@ -78,59 +106,9 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
 
   const companyStateCode = 'DL';
 
-  // Set default voucher numbers & narrations whenever voucherType changes
-  useEffect(() => {
-    switch (voucherType) {
-      case 'Sales':
-        setVoucherNumber('INV-2025-006');
-        setNarration('Being sales made against PO #99812');
-        setPartyLedger('Acme Traders Pvt Ltd');
-        break;
-      case 'Purchase':
-        setVoucherNumber('PUR-2025-004');
-        setSupplierRefNo('VORTEX-BILL-8819');
-        setNarration('Being raw materials purchased against vendor bill #8819');
-        setPartyLedger('Vortex Raw Materials');
-        break;
-      case 'Payment':
-        setVoucherNumber('PAY-2025-012');
-        setAccountLedger('HDFC Bank Account');
-        setNarration('Being vendor payment remitted via NEFT');
-        setPartyLedger('Vortex Raw Materials');
-        break;
-      case 'Receipt':
-        setVoucherNumber('REC-2025-009');
-        setAccountLedger('HDFC Bank Account');
-        setNarration('Being customer payment received against invoice #INV-2025-005');
-        setPartyLedger('Acme Traders Pvt Ltd');
-        break;
-      case 'Journal':
-        setVoucherNumber('JRN-2025-003');
-        setNarration('Being monthly office rent and electricity adjustment entry passed');
-        break;
-      case 'Contra':
-        setVoucherNumber('CTR-2025-002');
-        setNarration('Being cash deposited into HDFC Bank Account');
-        break;
-      case 'CreditNote':
-        setVoucherNumber('CN-2025-001');
-        setSupplierRefNo('INV-2025-005');
-        setNarration('Being credit note issued for returned defective goods');
-        setPartyLedger('Acme Traders Pvt Ltd');
-        break;
-      case 'DebitNote':
-        setVoucherNumber('DN-2025-001');
-        setSupplierRefNo('PUR-2025-001');
-        setNarration('Being debit note issued for damaged raw material received');
-        setPartyLedger('Vortex Raw Materials');
-        break;
-    }
-  }, [voucherType]);
-
   // Dynamic Item Rows for Sales / Purchase / Credit Note / Debit Note
   const [itemRows, setItemRows] = useState([
     { id: 1, particulars: 'Web Application Services', qty: 1, rate: 50000, gstRate: 18 },
-    { id: 2, particulars: 'Cloud Infrastructure Hosting', qty: 2, rate: 15000, gstRate: 18 },
   ]);
 
   // Payment / Receipt Entries
@@ -141,8 +119,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
   // Journal Entries (Dr / Cr double entry)
   const [journalRows, setJournalRows] = useState([
     { id: 1, type: 'Dr' as 'Dr' | 'Cr', ledger: 'Office Rent Expense', debit: 45000, credit: 0 },
-    { id: 2, type: 'Dr' as 'Dr' | 'Cr', ledger: 'Electricity Expenses', debit: 5000, credit: 0 },
-    { id: 3, type: 'Cr' as 'Dr' | 'Cr', ledger: 'HDFC Bank Account', debit: 0, credit: 50000 },
+    { id: 2, type: 'Cr' as 'Dr' | 'Cr', ledger: 'HDFC Bank Account', debit: 0, credit: 45000 },
   ]);
 
   // Contra State
@@ -150,11 +127,78 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
   const [contraToAcc, setContraToAcc] = useState('HDFC Bank Account');
   const [contraAmount, setContraAmount] = useState(25000);
 
+  // Set default voucher numbers & narrations whenever voucherType changes
+  useEffect(() => {
+    resetFormForType(voucherType);
+  }, [voucherType]);
+
+  const resetFormForType = (type: VoucherType) => {
+    const nextSeq = savedVouchers.filter(v => v.type === type).length + 6;
+    switch (type) {
+      case 'Sales':
+        setVoucherNumber(`INV-2025-00${nextSeq}`);
+        setNarration('Being sales of goods/services');
+        setPartyLedger('Acme Traders Pvt Ltd');
+        setItemRows([{ id: 1, particulars: 'Consultancy & Development Services', qty: 1, rate: 25000, gstRate: 18 }]);
+        break;
+      case 'Purchase':
+        setVoucherNumber(`PUR-2025-00${nextSeq}`);
+        setSupplierRefNo(`BILL-880${nextSeq}`);
+        setNarration('Being raw materials purchased');
+        setPartyLedger('Vortex Raw Materials');
+        setItemRows([{ id: 1, particulars: 'Raw Materials Grade-A', qty: 10, rate: 5000, gstRate: 18 }]);
+        break;
+      case 'Payment':
+        setVoucherNumber(`PAY-2025-00${nextSeq}`);
+        setAccountLedger('HDFC Bank Account');
+        setNarration('Being vendor payment remitted');
+        setPartyLedger('Vortex Raw Materials');
+        setPayEntries([{ id: 1, ledger: 'Vortex Raw Materials', amount: 25000, refNo: 'Against Ref: PUR-2025-001' }]);
+        break;
+      case 'Receipt':
+        setVoucherNumber(`REC-2025-00${nextSeq}`);
+        setAccountLedger('HDFC Bank Account');
+        setNarration('Being payment received from customer');
+        setPartyLedger('Acme Traders Pvt Ltd');
+        setPayEntries([{ id: 1, ledger: 'Acme Traders Pvt Ltd', amount: 50000, refNo: 'Against Ref: INV-2025-005' }]);
+        break;
+      case 'Journal':
+        setVoucherNumber(`JRN-2025-00${nextSeq}`);
+        setNarration('Being adjustment entry passed');
+        setJournalRows([
+          { id: 1, type: 'Dr', ledger: 'Office Rent Expense', debit: 30000, credit: 0 },
+          { id: 2, type: 'Cr', ledger: 'HDFC Bank Account', debit: 0, credit: 30000 },
+        ]);
+        break;
+      case 'Contra':
+        setVoucherNumber(`CTR-2025-00${nextSeq}`);
+        setNarration('Being cash deposited into bank');
+        setContraFromAcc('Cash Account');
+        setContraToAcc('HDFC Bank Account');
+        setContraAmount(10000);
+        break;
+      case 'CreditNote':
+        setVoucherNumber(`CN-2025-00${nextSeq}`);
+        setSupplierRefNo('INV-2025-005');
+        setNarration('Being credit note issued for goods returned');
+        setPartyLedger('Acme Traders Pvt Ltd');
+        setItemRows([{ id: 1, particulars: 'Returned License Key', qty: 1, rate: 10000, gstRate: 18 }]);
+        break;
+      case 'DebitNote':
+        setVoucherNumber(`DN-2025-00${nextSeq}`);
+        setSupplierRefNo('PUR-2025-001');
+        setNarration('Being debit note issued for defective material');
+        setPartyLedger('Vortex Raw Materials');
+        setItemRows([{ id: 1, particulars: 'Defective Material Return', qty: 2, rate: 5000, gstRate: 18 }]);
+        break;
+    }
+  };
+
   // Handlers for Item Rows
   const addItemRow = () => {
     setItemRows([
       ...itemRows,
-      { id: Date.now(), particulars: 'New Particulars Line', qty: 1, rate: 1000, gstRate: 18 }
+      { id: Date.now(), particulars: '', qty: 1, rate: 0, gstRate: 18 }
     ]);
   };
   const removeItemRow = (id: number) => {
@@ -166,7 +210,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
 
   // Handlers for Pay/Rec Entries
   const addPayRow = () => {
-    setPayEntries([...payEntries, { id: Date.now(), ledger: 'General Expense Account', amount: 1000, refNo: 'On Account' }]);
+    setPayEntries([...payEntries, { id: Date.now(), ledger: 'General Expense Account', amount: 0, refNo: 'On Account' }]);
   };
   const removePayRow = (id: number) => {
     if (payEntries.length > 1) setPayEntries(payEntries.filter(r => r.id !== id));
@@ -177,7 +221,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
 
   // Handlers for Journal Rows
   const addJournalRow = () => {
-    setJournalRows([...journalRows, { id: Date.now(), type: 'Dr', ledger: 'Miscellaneous Ledger', debit: 0, credit: 0 }]);
+    setJournalRows([...journalRows, { id: Date.now(), type: 'Dr', ledger: 'Office Rent Expense', debit: 0, credit: 0 }]);
   };
   const removeJournalRow = (id: number) => {
     if (journalRows.length > 1) setJournalRows(journalRows.filter(r => r.id !== id));
@@ -195,7 +239,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
     const isInterstate = placeOfSupply !== companyStateCode;
 
     itemRows.forEach(item => {
-      const lineAmt = item.qty * item.rate;
+      const lineAmt = (item.qty || 0) * (item.rate || 0);
       subtotal += lineAmt;
 
       if (isInterstate) {
@@ -227,6 +271,51 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
     return payEntries.reduce((sum, r) => sum + (parseFloat(r.amount as any) || 0), 0);
   }, [payEntries]);
 
+  // Current calculated total amount for active voucher
+  const currentTotalAmount = useMemo(() => {
+    if (voucherType === 'Sales' || voucherType === 'Purchase' || voucherType === 'CreditNote' || voucherType === 'DebitNote') {
+      return taxSummary.grandTotal;
+    } else if (voucherType === 'Payment' || voucherType === 'Receipt') {
+      return paySummary;
+    } else if (voucherType === 'Journal') {
+      return journalSummary.totalDebit;
+    } else {
+      return contraAmount;
+    }
+  }, [voucherType, taxSummary, paySummary, journalSummary, contraAmount]);
+
+  // Commit & Save Voucher to Local Storage
+  const handleCommitVoucher = () => {
+    let party = partyLedger;
+    if (voucherType === 'Payment' || voucherType === 'Receipt') {
+      party = `${accountLedger} ➔ ${payEntries.map(e => e.ledger).join(', ')}`;
+    } else if (voucherType === 'Journal') {
+      party = journalRows.map(r => r.ledger).join(' / ');
+    } else if (voucherType === 'Contra') {
+      party = `${contraFromAcc} ➔ ${contraToAcc}`;
+    }
+
+    const newV: SavedVoucher = {
+      id: Date.now().toString(),
+      number: voucherNumber,
+      type: voucherType,
+      date: voucherDate,
+      party,
+      amount: currentTotalAmount,
+      narration: narration || `Created ${voucherType} Voucher`,
+    };
+
+    setSavedVouchers([newV, ...savedVouchers]);
+    setShowAcceptModal(false);
+
+    alert(`Voucher ${voucherNumber} (${voucherType}) posted successfully!`);
+    resetFormForType(voucherType);
+  };
+
+  const handleDeleteVoucher = (id: string) => {
+    setSavedVouchers(savedVouchers.filter(v => v.id !== id));
+  };
+
   // Dynamic Theme Colors and Titles by Voucher Type
   const voucherMeta = useMemo(() => {
     switch (voucherType) {
@@ -254,25 +343,41 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative' }}>
       
-      {/* Top Selector Header */}
+      {/* Top Bar with Create New, Clear, & View Saved Vouchers Toggle */}
       <div style={{
         backgroundColor: voucherMeta.bg,
         border: `1px solid ${voucherMeta.color}`,
-        padding: '0.4rem 0.85rem',
+        padding: '0.45rem 0.85rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         borderRadius: '2px'
       }}>
-        <div style={{ color: voucherMeta.color, fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>Accounting Voucher Entry</span>
+        <div style={{ color: voucherMeta.color, fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span>Accounting Voucher Creation</span>
           <span style={{ fontSize: '0.8rem', backgroundColor: 'rgba(255,255,255,0.1)', padding: '0.15rem 0.5rem', borderRadius: '3px' }}>
             {voucherMeta.title}
           </span>
         </div>
 
-        {/* Voucher Type Tabs */}
-        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+        {/* Voucher Type Tabs & Actions */}
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => resetFormForType(voucherType)}
+            className="tally-btn-yellow"
+            style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 700 }}
+          >
+            + Create New (Reset)
+          </button>
+
+          <button
+            onClick={() => setShowSavedVouchers(!showSavedVouchers)}
+            className="tally-btn"
+            style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', backgroundColor: showSavedVouchers ? 'var(--tally-yellow)' : '#00252b', color: showSavedVouchers ? '#000' : '#fff' }}
+          >
+            📋 Day Book ({savedVouchers.length})
+          </button>
+
           {(['Sales', 'Purchase', 'Payment', 'Receipt', 'Journal', 'Contra', 'CreditNote', 'DebitNote'] as VoucherType[]).map(type => {
             const isSel = voucherType === type;
             return (
@@ -280,8 +385,8 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
                 key={type}
                 onClick={() => handleTypeSelect(type)}
                 style={{
-                  padding: '0.25rem 0.6rem',
-                  fontSize: '0.75rem',
+                  padding: '0.2rem 0.55rem',
+                  fontSize: '0.72rem',
                   backgroundColor: isSel ? 'var(--tally-yellow)' : '#00252b',
                   color: isSel ? '#002229' : '#fff',
                   fontWeight: isSel ? 700 : 400,
@@ -295,6 +400,60 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
           })}
         </div>
       </div>
+
+      {/* ------------------- SAVED VOUCHERS / DAY BOOK OVERLAY PANEL ------------------- */}
+      {showSavedVouchers && (
+        <div style={{ backgroundColor: 'var(--tally-card-bg)', border: '2px solid var(--tally-yellow)', padding: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ color: 'var(--tally-yellow)', fontWeight: 700, fontSize: '0.9rem' }}>
+              Day Book (Saved Accounting Vouchers in Database)
+            </span>
+            <button onClick={() => setShowSavedVouchers(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.9rem' }}>✕ Close</button>
+          </div>
+
+          {savedVouchers.length === 0 ? (
+            <div style={{ padding: '1rem', color: 'var(--tally-text-muted)', textAlign: 'center', fontSize: '0.85rem' }}>
+              No saved vouchers yet. Fill in the form and click "Post Voucher" to save!
+            </div>
+          ) : (
+            <table className="tally-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Voucher #</th>
+                  <th>Type</th>
+                  <th>Particulars / Party A/c</th>
+                  <th style={{ textAlign: 'right' }}>Amount (₹)</th>
+                  <th>Narration</th>
+                  <th style={{ textAlign: 'center' }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {savedVouchers.map((v) => (
+                  <tr key={v.id}>
+                    <td style={{ color: 'var(--tally-text-muted)' }}>{v.date}</td>
+                    <td className="tally-mono" style={{ color: 'var(--tally-yellow)', fontWeight: 700 }}>{v.number}</td>
+                    <td><span className="badge badge-dr">{v.type}</span></td>
+                    <td style={{ fontWeight: 600 }}>{v.party}</td>
+                    <td className="tally-mono" style={{ textAlign: 'right', fontWeight: 700, color: '#4ade80' }}>
+                      ₹ {v.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--tally-text-dim)' }}>{v.narration}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button
+                        onClick={() => handleDeleteVoucher(v.id)}
+                        style={{ background: 'none', border: 'none', color: 'var(--tally-red)', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        Delete 🗑
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {/* Dynamic Header Fields Grid */}
       <div style={{
@@ -432,6 +591,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
                     <input
                       className="tally-input"
                       type="text"
+                      placeholder="Type Item / Ledger Particulars..."
                       value={item.particulars}
                       onChange={e => updateItemRow(item.id, 'particulars', e.target.value)}
                       style={{ width: '100%' }}
@@ -470,7 +630,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
                     </select>
                   </td>
                   <td className="tally-mono" style={{ textAlign: 'right', fontWeight: 700 }}>
-                    {(item.qty * item.rate).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    {((item.qty || 0) * (item.rate || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <button onClick={() => removeItemRow(item.id)} style={{ background: 'none', border: 'none', color: 'var(--tally-red)', cursor: 'pointer' }}>✕</button>
@@ -747,15 +907,7 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
           }}>
             <span>Total {voucherMeta.typeLabel} Amount:</span>
             <span className="tally-mono">
-              ₹ {
-                (voucherType === 'Sales' || voucherType === 'Purchase' || voucherType === 'CreditNote' || voucherType === 'DebitNote')
-                  ? taxSummary.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })
-                  : voucherType === 'Payment' || voucherType === 'Receipt'
-                  ? paySummary.toLocaleString('en-IN', { minimumFractionDigits: 2 })
-                  : voucherType === 'Journal'
-                  ? journalSummary.totalDebit.toLocaleString('en-IN', { minimumFractionDigits: 2 })
-                  : contraAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })
-              }
+              ₹ {currentTotalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
           </div>
 
@@ -792,11 +944,11 @@ export const TransactionEntryPage: React.FC<TransactionEntryPageProps> = ({
               Accept {voucherMeta.typeLabel}?
             </h3>
             <p style={{ color: '#fff', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-              Commit {voucherMeta.typeLabel} Voucher ({voucherNumber}) to SQLite Database?
+              Commit {voucherMeta.typeLabel} Voucher ({voucherNumber}) for ₹ {currentTotalAmount.toLocaleString('en-IN')}?
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
               <button
-                onClick={() => { setShowAcceptModal(false); alert(`${voucherMeta.typeLabel} Voucher (${voucherNumber}) saved successfully!`); }}
+                onClick={handleCommitVoucher}
                 className="tally-btn-yellow"
                 style={{ padding: '0.4rem 1.25rem', backgroundColor: voucherMeta.color, color: '#000', fontWeight: 700 }}
               >
