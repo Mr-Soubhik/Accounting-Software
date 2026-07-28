@@ -1,4 +1,5 @@
 import React from 'react';
+import { VoucherType } from '../../types';
 
 export type NavTab = 
   | 'dashboard'
@@ -11,24 +12,25 @@ export type NavTab =
 
 interface SidebarProps {
   activeTab: NavTab;
-  onTabChange: (tab: NavTab) => void;
+  activeVoucherType?: VoucherType;
+  onTabChange: (tab: NavTab, voucherType?: VoucherType) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
-  const fKeys = [
-    { key: 'F2', label: 'Date', tab: 'dashboard' as NavTab },
-    { key: 'F3', label: 'Company', tab: 'settings' as NavTab },
-    { key: 'F4', label: 'Contra', tab: 'vouchers' as NavTab },
-    { key: 'F5', label: 'Payment', tab: 'vouchers' as NavTab },
-    { key: 'F6', label: 'Receipt', tab: 'vouchers' as NavTab },
-    { key: 'F7', label: 'Journal', tab: 'vouchers' as NavTab },
-    { key: 'F8', label: 'Sales', tab: 'vouchers' as NavTab },
-    { key: 'F9', label: 'Purchase', tab: 'vouchers' as NavTab },
-    { key: 'Alt+F6', label: 'Credit Note', tab: 'invoicing' as NavTab },
-    { key: 'Alt+F9', label: 'Debit Note', tab: 'invoicing' as NavTab },
-    { key: 'F10', label: 'Other Vouchers', tab: 'vouchers' as NavTab },
-    { key: 'F11', label: 'Features', tab: 'settings' as NavTab },
-    { key: 'F12', label: 'Configure', tab: 'settings' as NavTab },
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, activeVoucherType, onTabChange }) => {
+  const fKeys: { key: string; label: string; tab: NavTab; voucherType?: VoucherType }[] = [
+    { key: 'F2', label: 'Date', tab: 'dashboard' },
+    { key: 'F3', label: 'Company', tab: 'settings' },
+    { key: 'F4', label: 'Contra', tab: 'vouchers', voucherType: 'Contra' },
+    { key: 'F5', label: 'Payment', tab: 'vouchers', voucherType: 'Payment' },
+    { key: 'F6', label: 'Receipt', tab: 'vouchers', voucherType: 'Receipt' },
+    { key: 'F7', label: 'Journal', tab: 'vouchers', voucherType: 'Journal' },
+    { key: 'F8', label: 'Sales', tab: 'vouchers', voucherType: 'Sales' },
+    { key: 'F9', label: 'Purchase', tab: 'vouchers', voucherType: 'Purchase' },
+    { key: 'Alt+F6', label: 'Credit Note', tab: 'vouchers', voucherType: 'CreditNote' },
+    { key: 'Alt+F9', label: 'Debit Note', tab: 'vouchers', voucherType: 'DebitNote' },
+    { key: 'F10', label: 'Other Vouchers', tab: 'vouchers', voucherType: 'Sales' },
+    { key: 'F11', label: 'Features', tab: 'settings' },
+    { key: 'F12', label: 'Configure', tab: 'settings' },
   ];
 
   return (
@@ -43,7 +45,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       position: 'fixed',
       right: 0,
       top: '48px',
-      gap: '0.2rem'
+      gap: '0.2rem',
+      zIndex: 100
     }}>
       <div style={{
         fontSize: '0.65rem',
@@ -60,11 +63,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.2rem' }}>
         {fKeys.map((item, idx) => {
-          const isActive = activeTab === item.tab;
+          const isTabActive = activeTab === item.tab;
+          const isVoucherMatch = item.voucherType ? activeVoucherType === item.voucherType : true;
+          const isActive = isTabActive && isVoucherMatch;
+          
           return (
             <button
               key={idx}
-              onClick={() => onTabChange(item.tab)}
+              onClick={() => onTabChange(item.tab, item.voucherType)}
               style={{
                 width: '100%',
                 padding: '0.4rem 0.5rem',
@@ -88,3 +94,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     </aside>
   );
 };
+
