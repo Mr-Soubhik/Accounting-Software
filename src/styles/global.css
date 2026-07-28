@@ -1,3 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Tally Prime Authentic Color Palette */
+  --tally-teal-dark: #002229;
+  --tally-teal-header: #003640;
+  --tally-teal-bar: #004d5a;
+  --tally-yellow: #facc15;
+  --tally-yellow-hover: #eab308;
+  --tally-panel-bg: #091a21;
+  --tally-card-bg: #0f2730;
+  --tally-border: #1a3d4a;
+  --tally-border-highlight: #285869;
+  
+  --tally-text: #f1f5f9;
+  --tally-text-muted: #94a3b8;
+  --tally-text-dim: #64748b;
+  
+  --tally-green: #22c55e;
+  --tally-red: #ef4444;
+  --tally-blue: #38bdf8;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -5,7 +28,180 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #0f172a;
-  color: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--tally-teal-dark);
+  color: var(--tally-text);
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* Monospace font for numerical ledger & voucher entries */
+.tally-mono {
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--tally-teal-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--tally-border-highlight);
+}
+
+/* Tally Buttons */
+.tally-btn {
+  background: linear-gradient(180deg, #004d5a 0%, #003640 100%);
+  color: var(--tally-text);
+  border: 1px solid var(--tally-border-highlight);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+}
+
+.tally-btn:hover {
+  background: #005a69;
+  border-color: var(--tally-yellow);
+  color: #fff;
+}
+
+.tally-btn-yellow {
+  background: var(--tally-yellow);
+  color: #002229;
+  font-weight: 700;
+  border: 1px solid var(--tally-yellow-hover);
+}
+
+.tally-btn-yellow:hover {
+  background: var(--tally-yellow-hover);
+}
+
+/* Tally Inputs */
+.tally-input {
+  background-color: #051318;
+  border: 1px solid var(--tally-border-highlight);
+  color: var(--tally-yellow);
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 600;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.tally-input:focus {
+  border-color: var(--tally-yellow);
+  background-color: #001f26;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+}
+
+/* Tally Function Key Badge */
+.f-key {
+  color: var(--tally-yellow);
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: rgba(250, 204, 21, 0.15);
+  padding: 0.1rem 0.35rem;
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 2px;
+}
+
+/* Tally Table Formatting */
+.tally-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.tally-table th {
+  background-color: var(--tally-teal-header);
+  color: var(--tally-yellow);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--tally-border);
+  text-align: left;
+}
+
+.tally-table td {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--tally-border);
+  color: var(--tally-text);
+}
+
+.tally-table tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.tally-table tr:hover {
+  background-color: #003640;
+}
+
+/* Gateway Menu Styling */
+.gateway-box {
+  width: 380px;
+  background-color: var(--tally-card-bg);
+  border: 2px solid var(--tally-yellow);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.gateway-header {
+  background-color: var(--tally-teal-header);
+  color: var(--tally-yellow);
+  font-weight: 700;
+  text-align: center;
+  padding: 0.6rem;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--tally-yellow);
+}
+
+.gateway-section {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--tally-border);
+}
+
+.gateway-section-title {
+  color: var(--tally-yellow);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 1.25rem;
+}
+
+.gateway-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 1.25rem;
+  color: var(--tally-text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.gateway-item:hover {
+  background-color: var(--tally-yellow);
+  color: #002229;
+  font-weight: 700;
+}
+
+.gateway-hotkey {
+  color: var(--tally-yellow);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.gateway-item:hover .gateway-hotkey {
+  color: #002229;
 }
