@@ -75,7 +75,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentFy, onFyChange }) => {
 
         <div>
           <span style={{ color: 'var(--tally-text-muted)' }}>Current Period: </span>
-          <span style={{ color: '#fff', fontWeight: 600 }}>1-Apr-2025 to 31-Mar-2026</span>
+          <select
+            value={currentFy}
+            onChange={(e) => onFyChange(e.target.value)}
+            className="tally-input"
+            style={{ padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}
+          >
+            <option value="FY2025-26">1-Apr-2025 to 31-Mar-2026</option>
+            <option value="FY2024-25">1-Apr-2024 to 31-Mar-2025</option>
+          </select>
         </div>
 
         <div>

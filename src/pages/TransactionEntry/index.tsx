@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { VoucherType } from '../../types';
 
 export const TransactionEntryPage: React.FC = () => {
@@ -149,7 +149,7 @@ export const TransactionEntryPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {items.map((item, idx) => (
+            {items.map((item) => (
               <tr key={item.id}>
                 <td>
                   <input
@@ -255,7 +255,7 @@ export const TransactionEntryPage: React.FC = () => {
 
           <div style={{
             display: 'flex',
-            justify: 'space-between',
+            justifyContent: 'space-between',
             fontSize: '1.05rem',
             fontWeight: 700,
             color: 'var(--tally-yellow)',

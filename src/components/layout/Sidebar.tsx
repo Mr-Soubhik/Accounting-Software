@@ -59,28 +59,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.2rem' }}>
-        {fKeys.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => onTabChange(item.tab)}
-            style={{
-              width: '100%',
-              padding: '0.4rem 0.5rem',
-              backgroundColor: '#00252b',
-              border: '1px solid var(--tally-border-highlight)',
-              color: 'var(--tally-text)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              fontSize: '0.75rem',
-              textAlign: 'left',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ fontWeight: 500 }}>{item.label}</span>
-            <span className="f-key">{item.key}</span>
-          </button>
-        ))}
+        {fKeys.map((item, idx) => {
+          const isActive = activeTab === item.tab;
+          return (
+            <button
+              key={idx}
+              onClick={() => onTabChange(item.tab)}
+              style={{
+                width: '100%',
+                padding: '0.4rem 0.5rem',
+                backgroundColor: isActive ? '#004d5a' : '#00252b',
+                border: isActive ? '1px solid var(--tally-yellow)' : '1px solid var(--tally-border-highlight)',
+                color: isActive ? 'var(--tally-yellow)' : 'var(--tally-text)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.75rem',
+                textAlign: 'left',
+                cursor: 'pointer'
+              }}
+            >
+              <span style={{ fontWeight: 500 }}>{item.label}</span>
+              <span className="f-key">{item.key}</span>
+            </button>
+          );
+        })}
       </div>
     </aside>
   );
