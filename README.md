@@ -1,7 +1,7 @@
 # TallyPrimeMOD: An Offline-First Desktop Accounting & GST Engine for Small Businesses and Startups
 
-**Authors:** Soubhik  
-**Affiliation:** Department of Computer Science & Software Engineering  
+**Authors:** Soubhik Maity 
+**Affiliation:** Department of Computer Science & Engineering, Swami Vivekananda University Kolkata.
 **Repository:** [github.com/Mr-Soubhik/Accounting-Software](https://github.com/Mr-Soubhik/Accounting-Software)  
 **Document Standards:** IEEE Technical Documentation Specification  
 
